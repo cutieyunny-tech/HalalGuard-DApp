@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halal Guard: Privacy-First Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .highlight {
+            background-color: #d1fae5;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mt-10">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Halal Guard</h1>
+            <p class="text-xl text-gray-600">Privacy-First Halal Recommendations</p>
+        </header>
+
+        <!-- User Input Card -->
+        <div id="input-card" class="card">
+            <h2 class="text-2xl font-bold mb-4">Your Preferences</h2>
+            <p class="text-gray-600 mb-6">Select your dietary preferences. We will generate a zero-knowledge proof to verify compliance without revealing your specific choices.</p>
+            
+            <div class="flex flex-col space-y-4 mb-6">
+                <label class="flex items-center space-x-3">
+                    <input type="checkbox" id="no-alcohol" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md">
+                    <span>No alcohol or derivatives</span>
+                </label>
+                <label class="flex items-center space-x-3">
+                    <input type="checkbox" id="no-pork" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md">
+                    <span>No pork or by-products</span>
+                </label>
+                <label class="flex items-center space-x-3">
+                    <input type="checkbox" id="dairy-free" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md">
+                    <span>Dairy-free</span>
+                </label>
+            </div>
+
+            <button onclick="generateProofAndRecommend()" class="btn btn-primary w-full">Generate Private Recommendation</button>
+        </div>
+
+        <!-- Result Card (Hidden by default) -->
+        <div id="result-card" class="card hidden">
+            <h2 class="text-2xl font-bold mb-4">Product Recommendation</h2>
+            <div id="proof-status" class="mb-4">
+                <p class="text-gray-600">Generating zero-knowledge proof...</p>
+            </div>
+
+            <div id="recommendation-result" class="space-y-4">
+                <div class="p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-md">
+                    <p class="font-bold">Product A:</p>
+                    <p>Verified <span class="highlight">Halal Compliant</span> for you.</p>
+                </div>
+            </div>
+
+            <button onclick="resetApp()" class="btn btn-primary w-full mt-6">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        const inputCard = document.getElementById('input-card');
+        const resultCard = document.getElementById('result-card');
+        const proofStatus = document.getElementById('proof-status');
+        const recommendationResult = document.getElementById('recommendation-result');
+
+        // Mocked ZK-like logic and data
+        const PRODUCTS = [
+            { name: "Product A", compliant: true, allergens: [] },
+            { name: "Product B", compliant: false, allergens: ["pork"] },
+            { name: "Product C", compliant: true, allergens: ["dairy"] }
+        ];
+
+        function generateProofAndRecommend() {
+            // Hide input card and show result card
+            inputCard.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+
+            // Simulate ZK proof generation
+            proofStatus.innerHTML = '<p class="text-gray-600">Generating zero-knowledge proof...</p>';
+            recommendationResult.innerHTML = '';
+
+            setTimeout(() => {
+                // Get user preferences (this is where the ZK magic would happen)
+                const userPreferences = {
+                    noAlcohol: document.getElementById('no-alcohol').checked,
+                    noPork: document.getElementById('no-pork').checked,
+                    dairyFree: document.getElementById('dairy-free').checked
+                };
+
+                // In a real DApp, a ZK circuit would generate a proof
+                // based on userPreferences. This is the **pseudocode** part.
+                /*
+                // Pseudocode for ZK proof generation (using MidnightJS)
+                const circuit = new ZKCircuit('halal_verifier');
+                circuit.addPrivateInput('preferences', userPreferences);
+                const proof = circuit.generateProof();
+                
+                // Then, the proof would be submitted to a smart contract
+                // for verification.
+                const transaction = new Transaction();
+                transaction.addProof(proof);
+                const verificationStatus = smartContract.verify(transaction);
+                */
+
+                // Since we are mocking, we'll just check the preferences directly.
+                // The key is that the UI does NOT show the raw preference data.
+                const recommendations = PRODUCTS.filter(product => {
+                    let isCompliant = true;
+                    if (userPreferences.noPork && product.allergens.includes("pork")) {
+                        isCompliant = false;
+                    }
+                    if (userPreferences.dairyFree && product.allergens.includes("dairy")) {
+                        isCompliant = false;
+                    }
+                    // Add other checks here...
+                    return isCompliant;
+                });
+
+                // Display results based on the "verified" proof
+                proofStatus.innerHTML = '<p class="text-green-600 font-bold">Proof Verified! ✔️</p>';
+                
+                recommendations.forEach(product => {
+                    const resultHtml = `
+                        <div class="p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-md">
+                            <p class="font-bold">${product.name}:</p>
+                            <p>Verified <span class="highlight">Halal Compliant</span> for you.</p>
+                        </div>
+                    `;
+                    recommendationResult.innerHTML += resultHtml;
+                });
+            }, 1500);
+        }
+
+        function resetApp() {
+            inputCard.classList.remove('hidden');
+            resultCard.classList.add('hidden');
+            document.getElementById('no-alcohol').checked = false;
+            document.getElementById('no-pork').checked = false;
+            document.getElementById('dairy-free').checked = false;
+        }
+
+    </script>
+</body>
+</html>
+
